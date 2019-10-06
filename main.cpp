@@ -1,11 +1,18 @@
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+
+struct passwd *pw = getpwuid(getuid());
+
+const char *homedir = pw->pw_dir;
 
 using namespace::std;
 
 int main(int argc,char* argv[]) {
     if(argc == 1){
-        cout << "Open Password Manager with Encryption v0.2" << endl;
+        cout << "Open Password Manager with Encryption v0.3" << endl;
         cout << "Autor: NikMe" << endl;
         cout << "Usage:" << endl;
         cout << "opme add <name of service> - add password" << endl;
@@ -26,8 +33,8 @@ int main(int argc,char* argv[]) {
             for(int i = 0; (i < 100 && password[i] != '\0'); i++) {
                 password[i] = password[i] + keyNumber;
             }
-            fstream file;
-            file.open(argv[2],fstream::out);
+            string path = homedir + string("/pass/") + argv[2];
+            ofstream file (path);
             if(file.is_open()) {
                 file << password;
                 file.close();
@@ -43,7 +50,8 @@ int main(int argc,char* argv[]) {
     }
     if(string(argv[1]) == "get") {
         if(argv[2]) {
-            fstream file;
+            string path = homedir + string("/pass/") + argv[2];
+            ifstream file (path);
             file.open(argv[2]);
             if(file.is_open()) {
                 char password[100];
@@ -68,7 +76,8 @@ int main(int argc,char* argv[]) {
     }
     if(string(argv[1]) == "remove") {
         if(argv[2]) {
-            remove(argv[2]);
+            string path = homedir + string("/pass/") + argv[2];
+            remove(path.c_str());
             cout << "Password for " << argv[2] << " deleted!" << endl;
         } else {
             cout << "Not enough arguments!" << endl;
@@ -79,7 +88,9 @@ int main(int argc,char* argv[]) {
     }
     if(string(argv[1]) == "rename") {
         if(argv[2] && argv[3]) {
-            rename(argv[2],argv[3]);
+            string path1 = homedir + string("/pass/") + argv[2];
+            string path2 = homedir + string("/pass/") + argv[3];
+            rename(path1.c_str(),path2.c_str());
             cout << "Rename " << argv[2] << " to " << argv[3] << " successful!" << endl;
         } else {
             cout << "Not enough arguments!" << endl;
@@ -111,8 +122,8 @@ int main(int argc,char* argv[]) {
             for(int i = 0; (i < 100 && pass[i] != '\0'); i++) {
                 pass[i] = pass[i] + keyNumber;
             }
-            fstream file;
-            file.open(argv[2],fstream::out);
+            string path = homedir + string("/pass/") + argv[2];
+            ofstream file (path);
             if(file.is_open()) {
                 file << pass;
                 file.close();
